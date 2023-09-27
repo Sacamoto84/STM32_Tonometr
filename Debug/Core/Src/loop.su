@@ -1,0 +1,7 @@
+D:/Dropbox/Actual/Drivers/libs/logUART/logUART.h:16:7:void classLog::init(UART_HandleTypeDef*)	16	static
+D:/Dropbox/Actual/Drivers/libs/logUART/logUART.h:85:7:void classLog::w(const char*)	16	static
+D:/Dropbox/Actual/Drivers/libs/logUART/logUART.h:87:7:void classLog::i(const char*)	16	static
+../Core/Src/loop.cpp:20:7:float interpolatePressure(float)	40	static
+../Core/Src/loop.cpp:45:17:void setup()	8	static
+../Core/Src/loop.cpp:51:6:void loop()	64	static
+D:/Dropbox/Actual/Drivers/libs/logUART/logUART.h:70:7:) [with Args = {short int, float, float}]	56	static
