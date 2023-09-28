@@ -1,8 +1,17 @@
 #include "main.h"
 #include "logUART.h"
 #include "sdadc.h"
+#include "adc.h"
+#include "tim.h"
 
 classLog log;
+
+
+enum class State {Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday};
+
+State state; //
+
+extern void BT_Send_String(char *str);
 
 void loop();
 
@@ -44,8 +53,25 @@ extern "C" void setup() {
 	log.w((char*) "Старт");
 	loop();
 }
+volatile uint16_t adc_buffer[50] = {0};
+
+extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
+  /* This is called after the conversion is completed */
+	log.w((char*) "HAL_ADC_ConvCpltCallback");
+
+}
 
 void loop() {
+
+
+
+	//ADC1->CR2 |= ADC_CR2_ADON;    //Запуск ADC
+	//ADC1->CR2 |= ADC_CR2_SWSTART; //Start conversion of regular channels
+	//ADC1->CR2 |= ADC_CR2_DMA;     //Direct memory access mode
+
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_buffer, 50);
+	HAL_TIM_Base_Start_IT(&htim19);
+	//TIM19->CR1 |= TIM_CR1_CEN; //Запуск таймера на 480Hz -> ADC1
 
 	//HAL_SDADC_CalibrationStart(&hsdadc1, SDADC_CALIBRATION_SEQ_1);
 	//while (__HAL_SDADC_GET_FLAG(&hsdadc1, SDADC_FLAG_CALIBDONE) == RESET);
@@ -57,25 +83,30 @@ void loop() {
 	HAL_Delay(1000);
 
 	HAL_SDADC_Start(&hsdadc1);
-
 	SDADC1->CR2 |= SDADC_CR2_RSWSTART; // начало преобразования
+	HAL_SDADC_PollForConversion(&hsdadc1, 1000);
 
 	while (1) {
-		log.i((char*) "run");
+		//log.i((char*) "run");
 
-		int16_t adcValue;
-		HAL_SDADC_PollForConversion(&hsdadc1, 1000);
-		adcValue = HAL_SDADC_GetValue(&hsdadc1);
+		int16_t adcValue = HAL_SDADC_GetValue(&hsdadc1);
 		float adcFValue = (3.281F) * (adcValue) / 32768 * 3.036 / 3.075;
-		char str[32];
+		//char str[32];
 
 		//float pressure = 0.958 + (adcFValue - 0.958)*(300-0.958)/(2.631-0.958);
 
 		float pressure = interpolatePressure(adcFValue);
 
-		log.i("v1=%d f=%f p=%f", adcValue, adcFValue, pressure);
+		char s[128];
+		//sprintf (s,"v1=%d f=%f p=%f", adcValue, adcFValue, pressure);
+		sprintf (s,"v=%d f=%.3f p=%.1f", adcValue, adcFValue, pressure);
+		BT_Send_String(s);
 
-		HAL_Delay(100);
+
+
+		//log.i("v1=%d f=%f p=%f", adcValue, adcFValue, pressure);
+
+		HAL_Delay(10);
 	}
 
 }

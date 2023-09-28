@@ -25,7 +25,6 @@
 /* USER CODE END 0 */
 
 SDADC_HandleTypeDef hsdadc1;
-DMA_HandleTypeDef hdma_sdadc1;
 
 /* SDADC1 init function */
 void MX_SDADC1_Init(void)
@@ -109,23 +108,6 @@ void HAL_SDADC_MspInit(SDADC_HandleTypeDef* sdadcHandle)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* SDADC1 DMA Init */
-    /* SDADC1 Init */
-    hdma_sdadc1.Instance = DMA2_Channel3;
-    hdma_sdadc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_sdadc1.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_sdadc1.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_sdadc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_sdadc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-    hdma_sdadc1.Init.Mode = DMA_NORMAL;
-    hdma_sdadc1.Init.Priority = DMA_PRIORITY_LOW;
-    if (HAL_DMA_Init(&hdma_sdadc1) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    __HAL_LINKDMA(sdadcHandle,hdma,hdma_sdadc1);
-
     /* SDADC1 interrupt Init */
     HAL_NVIC_SetPriority(SDADC1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(SDADC1_IRQn);
@@ -150,9 +132,6 @@ void HAL_SDADC_MspDeInit(SDADC_HandleTypeDef* sdadcHandle)
     PB0     ------> SDADC1_AIN6P
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0);
-
-    /* SDADC1 DMA DeInit */
-    HAL_DMA_DeInit(sdadcHandle->hdma);
 
     /* SDADC1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(SDADC1_IRQn);

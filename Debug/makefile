@@ -9,6 +9,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include user/subdir.mk
 -include logUART/subdir.mk
 -include Drivers/STM32F3xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
@@ -76,8 +77,8 @@ all: main-build
 main-build: Tonometr.elf secondary-outputs
 
 # Tool invocations
-Tonometr.elf Tonometr.map: $(OBJS) $(USER_OBJS) D:\Dropbox\Actual\F373\STM32F373CCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "Tonometr.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Dropbox\Actual\F373\STM32F373CCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Tonometr.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+Tonometr.elf Tonometr.map: $(OBJS) $(USER_OBJS) D:\Dropbox\Actual\F373_Tonometr\STM32F373CCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "Tonometr.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Dropbox\Actual\F373_Tonometr\STM32F373CCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Tonometr.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

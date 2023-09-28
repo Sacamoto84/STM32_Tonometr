@@ -18,8 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "dma.h"
 #include "sdadc.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -92,6 +94,8 @@ int main(void)
   MX_SDADC1_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_ADC1_Init();
+  MX_TIM19_Init();
   /* USER CODE BEGIN 2 */
    setup();
   /* USER CODE END 2 */
@@ -100,11 +104,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-	  uint32_t adcValue;
-	  HAL_SDADC_PollForConversion(&hsdadc1, 1000);
-	  adcValue = HAL_SDADC_GetValue(&hsdadc1);
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -151,10 +150,12 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_USART2
-                              |RCC_PERIPHCLK_SDADC;
+                              |RCC_PERIPHCLK_ADC1|RCC_PERIPHCLK_SDADC;
   PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInit.SdadcClockSelection = RCC_SDADCSYSCLK_DIV48;
+  PeriphClkInit.Adc1ClockSelection = RCC_ADC1PCLK2_DIV2;
+
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -168,7 +169,7 @@ void SystemClock_Config(void)
 
 /**
   * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM19 interrupt took place, inside
+  * @note   This function is called  when TIM18 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
   * a global variable "uwTick" used as application time base.
   * @param  htim : TIM handle
@@ -179,7 +180,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM19) {
+  if (htim->Instance == TIM18) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
