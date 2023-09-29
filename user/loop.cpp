@@ -6,6 +6,11 @@
 
 classLog log;
 
+float maping(
+		float x, float in_min, float in_max,float out_min,float out_max
+){
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 enum class State {Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday};
 
@@ -63,7 +68,7 @@ extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 
 void loop() {
 
-
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
 	//ADC1->CR2 |= ADC_CR2_ADON;    //Запуск ADC
 	//ADC1->CR2 |= ADC_CR2_SWSTART; //Start conversion of regular channels
@@ -86,28 +91,32 @@ void loop() {
 	SDADC1->CR2 |= SDADC_CR2_RSWSTART; // начало преобразования
 	HAL_SDADC_PollForConversion(&hsdadc1, 1000);
 
+	HAL_ADC_PollForConversion(&hadc1, 1000);
+
 	while (1) {
-		//log.i((char*) "run");
+
+		int16_t adc12Value = HAL_ADC_GetValue(&hadc1);
 
 		int16_t adcValue = HAL_SDADC_GetValue(&hsdadc1);
 		float adcFValue = (3.281F) * (adcValue) / 32768 * 3.036 / 3.075;
-		//char str[32];
-
-		//float pressure = 0.958 + (adcFValue - 0.958)*(300-0.958)/(2.631-0.958);
 
 		float pressure = interpolatePressure(adcFValue);
 
 		char s[128];
 		//sprintf (s,"v1=%d f=%f p=%f", adcValue, adcFValue, pressure);
-		sprintf (s,"v=%d f=%.3f p=%.1f", adcValue, adcFValue, pressure);
+		//sprintf (s,"v=%d f=%.3f p=%.1f v12=%d", adcValue, adcFValue, pressure, adc12Value);
+		sprintf (s,"p%.0f v%d", pressure, adc12Value/8);
 		BT_Send_String(s);
 
+		log.i(s);
 
+		HAL_Delay(30);
 
-		//log.i("v1=%d f=%f p=%f", adcValue, adcFValue, pressure);
+		float a = maping(pressure, 30, 200,20000,10000);
+		TIM3->CCR2 = (int)a;
 
-		HAL_Delay(10);
 	}
 
 }
+
 
